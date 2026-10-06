@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Edit Job — {{ job.title }} — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Edit Job Posting</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Update details for <strong class="text-slate-800">{{ job.title }}</strong></p>
+    </div>
+    <a href="{% url 'jobs:detail' job.pk %}" class="btn-secondary text-xs px-3.5 py-2">
+      Discard Changes
+    </a>
+  </div>
+
+  <!-- Form -->
+  <div class="form-section">
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Job Title</label>
+          {{ form.title }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Company</label>
+          {{ form.company }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Location</label>
+          {{ form.location }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Employment Type</label>
+          {{ form.employment_type }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Experience Level</label>
+          {{ form.experience_level }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Compensation Range</label>
+          {{ form.salary_range }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Application Deadline</label>
+          {{ form.application_deadline }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Role Overview</label>
+          {{ form.description }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Requirements & Qualifications</label>
+          {{ form.requirements }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Required Skills</label>
+          {{ form.skills_required }}
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
+        <a href="{% url 'jobs:detail' job.pk %}" class="btn-secondary text-xs px-4 py-2">
+          Cancel
+        </a>
+        <button type="submit" class="btn-primary text-xs px-6 py-2.5 font-bold shadow-md shadow-brand-500/20">
+          Save Changes →
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

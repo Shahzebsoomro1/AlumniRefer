@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Request Referral — {{ job.title }} — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+
+  <!-- Breadcrumb -->
+  <a href="{% url 'jobs:detail' job.pk %}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-brand-600 transition-colors">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    Back to {{ job.title }}
+  </a>
+
+  <!-- Target Role Summary Card -->
+  <div class="card p-5 flex items-center gap-4">
+    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 text-white font-extrabold text-sm flex items-center justify-center flex-shrink-0 shadow-sm">
+      {{ job.company|slice:":2"|upper }}
+    </div>
+    <div class="min-w-0 flex-1">
+      <h2 class="text-base font-bold text-slate-900 truncate">{{ job.title }}</h2>
+      <p class="text-xs text-slate-500 mt-0.5">
+        {{ job.company }} · Referrer: <strong class="text-slate-800">{{ job.posted_by.get_full_name }}</strong> ({{ job.posted_by.profile.job_title|default:"Corporate Alumni" }})
+      </p>
+    </div>
+  </div>
+
+  <!-- Form Section -->
+  <div class="form-section">
+    <div class="mb-6 space-y-1">
+      <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Request an Employee Referral</h1>
+      <p class="text-xs text-slate-500">
+        Your note will be delivered directly to {{ job.posted_by.first_name }}'s dashboard for review.
+      </p>
+    </div>
+
+    <!-- Professional Guidelines Box -->
+    <div class="p-4 rounded-xl bg-brand-50/60 border border-brand-100 text-xs text-brand-900 space-y-2 mb-6">
+      <strong class="font-bold block uppercase tracking-wider text-[11px] text-brand-950 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Recommendation Guidelines
+      </strong>
+      <ul class="space-y-1 text-slate-600 list-disc list-inside">
+        <li>Introduce your relationship or shared corporate background.</li>
+        <li>State 2-3 specific technical competencies matching this role.</li>
+        <li>Provide a direct link to your portfolio or LinkedIn profile.</li>
+      </ul>
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          Your Cover Note <span class="text-rose-500">*</span>
+          <span class="text-slate-400 font-normal lowercase">(max 1000 characters)</span>
+        </label>
+        {{ form.cover_note }}
+        {% if form.cover_note.errors %}
+        <p class="mt-1 text-xs text-rose-600 font-medium">{{ form.cover_note.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+        <a href="{% url 'jobs:detail' job.pk %}" class="btn-secondary text-xs px-4 py-2">
+          Cancel
+        </a>
+        <button type="submit" class="btn-primary text-xs px-6 py-2.5 font-bold shadow-md shadow-brand-500/20">
+          Submit Referral Inquiry →
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

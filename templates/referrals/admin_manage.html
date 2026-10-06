@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Outcome Supervision & Referral Governance — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Referral Lifecycle Supervision</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Audit candidate inquiries, alumni response compliance, and record official hiring outcomes</p>
+    </div>
+    <span class="badge-indigo text-xs px-3 py-1 font-bold self-start sm:self-auto">
+      {{ all_referrals|length }} Total Ecosystem Records
+    </span>
+  </div>
+
+  <!-- Filters -->
+  <div class="card p-4 sm:p-5">
+    <form method="get" class="flex flex-col sm:flex-row items-center gap-3">
+      <div class="w-full sm:w-56">
+        <select name="status" class="text-xs font-semibold">
+          <option value="">All Statuses</option>
+          <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Review</option>
+          <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Accepted</option>
+          <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Declined</option>
+        </select>
+      </div>
+      <div class="w-full sm:w-56">
+        <select name="outcome" class="text-xs font-semibold">
+          <option value="">All Hiring Outcomes</option>
+          {% for val, label in outcome_choices %}
+          {% if val %}
+          <option value="{{ val }}" {% if val == outcome_filter %}selected{% endif %}>{{ label }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn-primary text-xs px-4 py-2 w-full sm:w-auto font-bold">
+        Apply Filter
+      </button>
+      {% if status_filter or outcome_filter %}
+      <a href="{% url 'referrals:admin_manage' %}" class="btn-secondary text-xs px-4 py-2 w-full sm:w-auto">
+        Reset
+      </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50/75 border-b border-slate-100 text-[11px] uppercase tracking-wider font-bold text-slate-500">
+          <tr>
+            <th class="px-6 py-3.5">Candidate</th>
+            <th class="px-6 py-3.5">Role & Referrer</th>
+            <th class="px-6 py-3.5">Referral Status</th>
+            <th class="px-6 py-3.5">Admin Outcome</th>
+            <th class="px-6 py-3.5">Date Submitted</th>
+            <th class="px-6 py-3.5 text-right">Supervise</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for ref in all_referrals %}
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            
+            <!-- Candidate -->
+            <td class="px-6 py-4">
+              <a href="{% url 'accounts:profile_detail' ref.requester.pk %}" class="font-bold text-slate-900 hover:text-brand-600 block text-xs">
+                {{ ref.requester.get_full_name }}
+              </a>
+              <span class="text-[11px] text-slate-400 font-medium">{{ ref.requester.email }}</span>
+            </td>
+
+            <!-- Role & Alumni -->
+            <td class="px-6 py-4">
+              <a href="{% url 'jobs:detail' ref.job.pk %}" class="font-bold text-slate-800 hover:text-brand-600 block text-xs truncate max-w-xs">
+                {{ ref.job.title }}
+              </a>
+              <span class="text-[11px] text-slate-500 font-medium">
+                {{ ref.job.company }} · Referrer: 
+                <a href="{% url 'accounts:profile_detail' ref.alumni.pk %}" class="text-brand-600 hover:underline">
+                  {{ ref.alumni.first_name }}
+                </a>
+              </span>
+            </td>
+
+            <!-- Referral Status -->
+            <td class="px-6 py-4">
+              <span class="badge
+                {% if ref.status == 'pending' %}badge-yellow
+                {% elif ref.status == 'accepted' %}badge-green
+                {% elif ref.status == 'rejected' %}badge-red
+                {% else %}badge-gray{% endif %} text-[11px]">
+                {{ ref.get_status_display }}
+              </span>
+            </td>
+
+            <!-- Admin Outcome -->
+            <td class="px-6 py-4">
+              {% if ref.admin_outcome %}
+              <span class="badge {% if ref.admin_outcome == 'hired' %}badge-green{% elif ref.admin_outcome == 'interviewed' %}badge-blue{% else %}badge-gray{% endif %} text-[11px]">
+                {{ ref.get_admin_outcome_display }}
+              </span>
+              {% else %}
+              <span class="text-xs text-slate-400 font-medium">Not marked</span>
+              {% endif %}
+            </td>
+
+            <!-- Date -->
+            <td class="px-6 py-4 text-xs text-slate-400 font-medium">
+              {{ ref.created_at|date:"M d, Y" }}
+            </td>
+
+            <!-- Action -->
+            <td class="px-6 py-4 text-right">
+              <a href="{% url 'referrals:mark_outcome' ref.pk %}" class="btn-primary text-xs px-3 py-1 font-bold">
+                Update Outcome
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-6 py-16 text-center text-slate-400 text-xs">
+              No referral requests match the specified filters.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

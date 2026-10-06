@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.get_full_name }} — Alumni Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+  <!-- Profile Hero Header -->
+  <div class="card overflow-hidden">
+    <div class="h-32 bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900"></div>
+    <div class="px-6 sm:px-8 pb-8 relative">
+      
+      <!-- Avatar -->
+      <div class="absolute -top-12 left-6 sm:left-8">
+        {% if profile.avatar %}
+          <img src="{{ profile.avatar.url }}" alt="Avatar" class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md">
+        {% else %}
+          <div class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-brand-700 to-indigo-500 border-4 border-white shadow-md flex items-center justify-center text-white text-2xl font-extrabold">
+            {{ profile_user.first_name|first|upper }}{{ profile_user.last_name|first|upper }}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Action Button -->
+      <div class="flex justify-end pt-4">
+        {% if request.user == profile_user %}
+        <a href="{% url 'accounts:edit_profile' %}" class="btn-secondary text-xs px-4 py-2">
+          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          Edit Profile
+        </a>
+        {% elif request.user.is_job_seeker and profile_user.is_alumni and profile.is_accepting_referrals %}
+        <span class="badge-green text-xs px-3 py-1 font-bold">
+          Open to Referral Requests
+        </span>
+        {% endif %}
+      </div>
+
+      <!-- Name & Title -->
+      <div class="mt-6">
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ profile_user.get_full_name }}</h1>
+          <span class="badge-indigo text-xs capitalize">{{ profile_user.get_role_display }}</span>
+          {% if profile.is_verified %}
+          <span class="badge-green text-xs">Verified</span>
+          {% endif %}
+        </div>
+        
+        <p class="text-sm font-semibold text-slate-600 mt-1">
+          {{ profile.job_title|default:"Corporate Member" }}
+          {% if profile.company %}
+          <span class="text-brand-600 font-bold">at {{ profile.company }}</span>
+          {% endif %}
+        </p>
+
+        {% if profile.location %}
+        <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+          {{ profile.location }}
+        </p>
+        {% endif %}
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div class="flex items-center gap-8 mt-6 pt-6 border-t border-slate-100 text-xs">
+        {% if profile.years_of_experience %}
+        <div>
+          <span class="text-slate-400 block font-medium">Experience</span>
+          <span class="text-base font-extrabold text-slate-900">{{ profile.years_of_experience }}+ Years</span>
+        </div>
+        {% endif %}
+        {% if profile_user.is_alumni %}
+        <div>
+          <span class="text-slate-400 block font-medium">Roles Posted</span>
+          <span class="text-base font-extrabold text-brand-600">{{ profile_user.job_postings.count }} Openings</span>
+        </div>
+        {% endif %}
+        {% if profile.linkedin_url %}
+        <div>
+          <span class="text-slate-400 block font-medium">Professional Profile</span>
+          <a href="{{ profile.linkedin_url }}" target="_blank" class="text-sm font-bold text-brand-600 hover:underline flex items-center gap-1">
+            LinkedIn Profile ↗
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left: Bio & Skills -->
+    <div class="lg:col-span-2 space-y-6">
+      {% if profile.bio %}
+      <div class="card p-6 space-y-2">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">About</h3>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">{{ profile.bio }}</p>
+      </div>
+      {% endif %}
+
+      {% if profile.get_skills_list %}
+      <div class="card p-6 space-y-3">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Skills & Expertise</h3>
+        <div class="flex flex-wrap gap-1.5">
+          {% for skill in profile.get_skills_list %}
+          <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200/60">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if profile_user.is_alumni %}
+      <div class="card p-6 space-y-3">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Job Postings</h3>
+        <div class="space-y-2">
+          {% for job in profile_user.job_postings.all %}
+          <a href="{% url 'jobs:detail' job.pk %}" class="p-3 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between hover:border-slate-300 transition-all block">
+            <div>
+              <p class="text-xs font-bold text-slate-900">{{ job.title }}</p>
+              <p class="text-[11px] text-slate-400">{{ job.company }} · {{ job.get_employment_type_display }}</p>
+            </div>
+            <span class="badge {% if job.status == 'active' %}badge-green{% else %}badge-gray{% endif %} text-[10px]">
+              {{ job.get_status_display }}
+            </span>
+          </a>
+          {% empty %}
+          <p class="text-xs text-slate-400 py-3">No active job postings yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Contact Card -->
+    <div class="space-y-5">
+      <div class="card p-6 space-y-4">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Contact & Verification</h3>
+        <div class="space-y-3 text-xs">
+          <div>
+            <span class="text-slate-400 block font-medium">Email</span>
+            <span class="text-slate-800 font-semibold">{{ profile_user.email }}</span>
+          </div>
+          {% if profile.phone %}
+          <div>
+            <span class="text-slate-400 block font-medium">Phone</span>
+            <span class="text-slate-800 font-semibold">{{ profile.phone }}</span>
+          </div>
+          {% endif %}
+          <div>
+            <span class="text-slate-400 block font-medium">Joined Network</span>
+            <span class="text-slate-800 font-semibold">{{ profile_user.date_joined|date:"F Y" }}</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block font-medium">Status</span>
+            <span class="text-emerald-700 font-bold">Good Standing</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

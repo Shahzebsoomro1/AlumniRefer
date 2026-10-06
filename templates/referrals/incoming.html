@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Incoming Referral Requests — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Incoming Referral Inquiries</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Review candidate credentials and cover notes submitted for your posted openings</p>
+    </div>
+    
+    <!-- Filter -->
+    <form method="get" class="flex items-center gap-2">
+      <select name="status" onchange="this.form.submit()" class="text-xs !py-2 !px-3 font-semibold text-slate-700">
+        <option value="">All Statuses</option>
+        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Review</option>
+        <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Accepted</option>
+        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Declined</option>
+      </select>
+    </form>
+  </div>
+
+  <!-- Inquiries List -->
+  <div class="space-y-4">
+    {% for ref in referral_requests %}
+    <div class="card p-6 transition-all hover:border-slate-300 {% if ref.status == 'pending' %}border-l-4 border-l-amber-400{% elif ref.status == 'accepted' %}border-l-4 border-l-emerald-400{% endif %}">
+      <div class="flex flex-col md:flex-row md:items-start justify-between gap-5">
+        
+        <!-- Left: Candidate Details -->
+        <div class="flex items-start gap-4 flex-1 min-w-0">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 text-white font-extrabold text-sm flex items-center justify-center flex-shrink-0 shadow-sm">
+            {{ ref.requester.first_name|first|upper }}{{ ref.requester.last_name|first|upper }}
+          </div>
+
+          <div class="flex-1 min-w-0 space-y-2.5">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <h2 class="text-base font-bold text-slate-900">
+                <a href="{% url 'accounts:profile_detail' ref.requester.pk %}" class="hover:text-brand-600 transition-colors">
+                  {{ ref.requester.get_full_name }}
+                </a>
+              </h2>
+              <span class="badge
+                {% if ref.status == 'pending' %}badge-yellow
+                {% elif ref.status == 'accepted' %}badge-green
+                {% elif ref.status == 'rejected' %}badge-red
+                {% else %}badge-gray{% endif %} text-[11px]">
+                {{ ref.get_status_display }}
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-500 font-medium">
+              Applied for: 
+              <a href="{% url 'jobs:detail' ref.job.pk %}" class="text-slate-800 font-bold hover:text-brand-600 underline">
+                {{ ref.job.title }}
+              </a>
+              <span class="text-slate-400 ml-2">· Submitted {{ ref.created_at|timesince }} ago</span>
+            </p>
+
+            <!-- Cover Note -->
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-700 leading-relaxed font-normal">
+              <strong class="block text-[11px] uppercase tracking-wider font-bold text-slate-900 mb-1">Candidate Cover Note:</strong>
+              {{ ref.cover_note }}
+            </div>
+
+            <!-- Candidate Skills -->
+            {% if ref.requester.profile.get_skills_list %}
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              {% for skill in ref.requester.profile.get_skills_list|slice:":5" %}
+              <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200/60">{{ skill }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="flex md:flex-col items-center md:items-end justify-between md:justify-start gap-2 flex-shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+          <a href="{% url 'accounts:profile_detail' ref.requester.pk %}" class="btn-secondary text-xs px-3.5 py-2 w-full text-center">
+            View Profile
+          </a>
+
+          {% if ref.status == 'pending' %}
+          <a href="{% url 'referrals:respond' ref.pk %}" class="btn-primary text-xs px-3.5 py-2 w-full text-center font-bold">
+            Respond Now →
+          </a>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+    {% empty %}
+    <div class="card p-16 text-center text-slate-400 space-y-3">
+      <svg class="w-12 h-12 mx-auto text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+      <p class="text-base font-bold text-slate-700">No incoming referral requests</p>
+      <p class="text-xs text-slate-400">Post open positions from your employer to receive candidate referral inquiries.</p>
+      <a href="{% url 'jobs:create' %}" class="btn-primary text-xs inline-flex mt-2">Post an Opening</a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

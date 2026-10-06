@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex items-center justify-center py-6" x-data="{
+  fill(email, pass) {
+    document.getElementById('id_username').value = email;
+    document.getElementById('id_password').value = pass;
+  }
+}">
+  <div class="w-full max-w-md space-y-6">
+
+    <!-- Header -->
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-700 to-indigo-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-brand-500/20">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+      </div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Sign in to your account</h1>
+      <p class="text-xs text-slate-500">Access your referral requests, postings, and alumni messages</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="card p-7 sm:p-8 bg-white border-slate-200">
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+          <p class="mt-1 text-xs text-rose-600 font-medium">{{ form.username.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+          {{ form.password }}
+          {% if form.password.errors %}
+          <p class="mt-1 text-xs text-rose-600 font-medium">{{ form.password.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl">
+          <p class="text-xs text-rose-700 font-semibold">{{ form.non_field_errors.0 }}</p>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn-primary w-full text-sm py-2.5 mt-2 font-bold shadow-md shadow-brand-500/20">
+          Sign In →
+        </button>
+      </form>
+
+      <!-- Quick Demo Logins Helper -->
+      <div class="mt-6 pt-5 border-t border-slate-100">
+        <p class="text-[11px] uppercase tracking-wider font-bold text-slate-400 text-center mb-2.5">
+          One-Click Demo Accounts
+        </p>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" @click="fill('admin@alumni.com', 'adminpassword123')"
+                  class="p-2 rounded-lg border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 text-[11px] font-semibold text-slate-700 transition text-center">
+            Super Admin
+          </button>
+          <button type="button" @click="fill('sarah.connor@google.com', 'password123')"
+                  class="p-2 rounded-lg border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 text-[11px] font-semibold text-slate-700 transition text-center">
+            Alumni (Google)
+          </button>
+          <button type="button" @click="fill('john.doe@email.com', 'password123')"
+                  class="p-2 rounded-lg border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 text-[11px] font-semibold text-slate-700 transition text-center">
+            Candidate
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-5 text-center">
+        <p class="text-xs text-slate-500">
+          Don't have an account?
+          <a href="{% url 'accounts:register' %}" class="text-brand-600 font-bold hover:underline ml-1">Create one free</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

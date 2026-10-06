@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Corporate Alumni Directory — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Verified Alumni Directory</h1>
+      <p class="text-slate-500 text-sm mt-1">Connect with former colleagues across top tech companies open to giving referrals</p>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="card p-4 sm:p-5">
+    <form method="get" class="flex flex-col sm:flex-row gap-3">
+      <div class="flex-1 relative">
+        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" name="q" value="{{ search }}" placeholder="Search by role or skill (e.g. Go, Distributed Systems)..." class="!pl-10 text-sm">
+      </div>
+      <div class="sm:w-64">
+        <input type="text" name="company" value="{{ company }}" placeholder="Filter by company (e.g. Stripe, Google)..." class="text-sm">
+      </div>
+      <button type="submit" class="btn-primary text-xs px-5 py-2.5 whitespace-nowrap">
+        Search Alumni
+      </button>
+      {% if search or company %}
+      <a href="{% url 'accounts:alumni_list' %}" class="btn-secondary text-xs px-4 py-2.5 whitespace-nowrap">
+        Reset
+      </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Alumni Cards Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for alumni_user in alumni %}
+    <div class="card p-6 flex flex-col justify-between hover:border-slate-300 transition-all group">
+      <div>
+        
+        <!-- Header -->
+        <div class="flex items-start gap-3.5 mb-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-700 to-indigo-500 text-white font-extrabold text-sm flex items-center justify-center flex-shrink-0 shadow-sm">
+            {{ alumni_user.first_name|first|upper }}{{ alumni_user.last_name|first|upper }}
+          </div>
+          <div class="min-w-0 flex-1">
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-brand-600 transition-colors truncate">
+              <a href="{% url 'accounts:profile_detail' alumni_user.pk %}">{{ alumni_user.get_full_name }}</a>
+            </h3>
+            <p class="text-xs text-slate-500 truncate mt-0.5">{{ alumni_user.profile.job_title|default:"Corporate Alumni" }}</p>
+            {% if alumni_user.profile.company %}
+            <span class="inline-flex items-center gap-1 text-[11px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded mt-1.5 border border-brand-100">
+              {{ alumni_user.profile.company }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Bio snippet -->
+        {% if alumni_user.profile.bio %}
+        <p class="text-xs text-slate-600 leading-relaxed line-clamp-2 mb-4 font-normal">
+          {{ alumni_user.profile.bio }}
+        </p>
+        {% endif %}
+
+        <!-- Skills -->
+        {% if alumni_user.profile.get_skills_list %}
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          {% for skill in alumni_user.profile.get_skills_list|slice:":4" %}
+          <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px] font-medium border border-slate-200/60">{{ skill }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div>
+
+      <!-- Footer Info & Profile Link -->
+      <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+        <span class="text-slate-400 flex items-center gap-1 text-[11px]">
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+          {{ alumni_user.profile.location|default:"United States" }}
+        </span>
+        <a href="{% url 'accounts:profile_detail' alumni_user.pk %}" class="font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+          View Profile →
+        </a>
+      </div>
+
+    </div>
+    {% empty %}
+    <div class="col-span-full card p-16 text-center text-slate-400 space-y-2">
+      <p class="text-base font-bold text-slate-700">No alumni found</p>
+      <p class="text-xs text-slate-400">Try broadening your search criteria.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

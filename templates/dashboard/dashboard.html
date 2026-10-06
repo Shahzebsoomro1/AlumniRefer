@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+  <!-- ======================================================== -->
+  <!-- 1. JOB SEEKER DASHBOARD -->
+  <!-- ======================================================== -->
+  {% if user.is_job_seeker %}
+  
+  <!-- Header Banner -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Candidate Dashboard</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Welcome back, <strong class="text-slate-800">{{ user.first_name }}</strong>. Track your active referral requests.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'jobs:list' %}" class="btn-primary text-xs px-4 py-2.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        Explore {{ active_jobs_count }} Jobs
+      </a>
+      <a href="{% url 'accounts:alumni_list' %}" class="btn-secondary text-xs px-4 py-2.5">
+        Alumni Directory
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Stat Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat-card">
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Inquiries</span>
+      <p class="text-3xl font-extrabold text-slate-900">{{ total_requests }}</p>
+      <span class="text-[11px] text-slate-500 mt-2 block font-medium">All referral submissions</span>
+    </div>
+    <div class="stat-card border-l-4 border-l-amber-400">
+      <span class="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-1">Pending Review</span>
+      <p class="text-3xl font-extrabold text-amber-600">{{ pending_count }}</p>
+      <span class="text-[11px] text-slate-500 mt-2 block font-medium">Awaiting alumni response</span>
+    </div>
+    <div class="stat-card border-l-4 border-l-emerald-400">
+      <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider block mb-1">Accepted Referrals</span>
+      <p class="text-3xl font-extrabold text-emerald-600">{{ accepted_count }}</p>
+      <span class="text-[11px] text-slate-500 mt-2 block font-medium">Internal referral active</span>
+    </div>
+    <div class="stat-card border-l-4 border-l-indigo-400">
+      <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider block mb-1">Active Roles</span>
+      <p class="text-3xl font-extrabold text-brand-600">{{ active_jobs_count }}</p>
+      <a href="{% url 'jobs:list' %}" class="text-[11px] text-brand-600 font-bold hover:underline mt-2 inline-block">Browse roles →</a>
+    </div>
+  </div>
+
+  <!-- Active Referral Submissions Table -->
+  <div class="card overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div>
+        <h2 class="font-bold text-slate-900 text-sm">Your Referral Submissions</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Real-time status updates from corporate referrers</p>
+      </div>
+      <a href="{% url 'referrals:my_requests' %}" class="text-xs font-semibold text-brand-600 hover:underline">View All Submissions →</a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50/75 border-b border-slate-100 text-[11px] uppercase tracking-wider font-bold text-slate-500">
+          <tr>
+            <th class="px-6 py-3">Role & Company</th>
+            <th class="px-6 py-3">Alumni Referrer</th>
+            <th class="px-6 py-3">Request Status</th>
+            <th class="px-6 py-3">Admin Outcome</th>
+            <th class="px-6 py-3">Submitted</th>
+            <th class="px-6 py-3 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for ref in my_requests %}
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="px-6 py-4">
+              <a href="{% url 'jobs:detail' ref.job.pk %}" class="font-bold text-slate-900 hover:text-brand-600 block">
+                {{ ref.job.title }}
+              </a>
+              <span class="text-xs text-slate-500 font-medium">{{ ref.job.company }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="font-semibold text-slate-800 text-xs block">{{ ref.alumni.get_full_name }}</span>
+              <span class="text-[11px] text-slate-400">{{ ref.alumni.profile.job_title|default:"Alumni" }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="badge
+                {% if ref.status == 'pending' %}badge-yellow
+                {% elif ref.status == 'accepted' %}badge-green
+                {% elif ref.status == 'rejected' %}badge-red
+                {% else %}badge-gray{% endif %}">
+                {{ ref.get_status_display }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              {% if ref.admin_outcome %}
+              <span class="badge {% if ref.admin_outcome == 'hired' %}badge-green{% elif ref.admin_outcome == 'interviewed' %}badge-blue{% else %}badge-gray{% endif %}">
+                {{ ref.get_admin_outcome_display }}
+              </span>
+              {% else %}
+              <span class="text-xs text-slate-400">In Progress</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-xs text-slate-400 font-medium">
+              {{ ref.created_at|date:"M d, Y" }}
+            </td>
+            <td class="px-6 py-4 text-right">
+              <a href="{% url 'jobs:detail' ref.job.pk %}" class="btn-secondary text-xs px-3 py-1.5 font-medium">
+                View Role
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center text-slate-400 text-xs">
+              No referral requests yet. Browse open roles and reach out to alumni!
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+
+  <!-- ======================================================== -->
+  <!-- 2. ALUMNI DASHBOARD -->
+  <!-- ======================================================== -->
+  {% if user.is_alumni %}
+  
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Alumni Referrer Hub</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Welcome, <strong class="text-slate-800">{{ user.first_name }}</strong>. Manage your postings and incoming requests.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'jobs:create' %}" class="btn-primary text-xs px-4 py-2.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Post New Opening
+      </a>
+      <a href="{% url 'referrals:incoming' %}" class="btn-secondary text-xs px-4 py-2.5">
+        Pending Inquiries ({{ pending_incoming }})
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Stat Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat-card">
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Your Postings</span>
+      <p class="text-3xl font-extrabold text-slate-900">{{ total_jobs }}</p>
+      <span class="text-[11px] text-slate-500 mt-2 block font-medium">{{ active_jobs }} currently active</span>
+    </div>
+    <div class="stat-card border-l-4 border-l-amber-400">
+      <span class="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-1">Awaiting Review</span>
+      <p class="text-3xl font-extrabold text-amber-600">{{ pending_incoming }}</p>
+      <span class="text-[11px] text-slate-500 mt-2 block font-medium">Candidate requests</span>
+    </div>
+    <div class="stat-card border-l-4 border-l-emerald-400">
+      <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider block mb-1">Approved Referrals</span>
+      <p class="text-3xl font-extrabold text-emerald-600">{{ accepted_incoming }}</p>
+      <span class="text-[11px] text-slate-500 mt-2 block font-medium">Submitted internally</span>
+    </div>
+    <div class="stat-card border-l-4 border-l-indigo-400">
+      <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider block mb-1">Total Inquiries</span>
+      <p class="text-3xl font-extrabold text-brand-600">{{ total_incoming }}</p>
+      <a href="{% url 'referrals:incoming' %}" class="text-[11px] text-brand-600 font-bold hover:underline mt-2 inline-block">Review all →</a>
+    </div>
+  </div>
+
+  <!-- Pending Review Alert -->
+  {% if pending_incoming > 0 %}
+  <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+      <div>
+        <p class="text-xs font-bold text-amber-900">You have {{ pending_incoming }} candidate referral request{{ pending_incoming|pluralize }} waiting for your response.</p>
+        <p class="text-[11px] text-amber-700 mt-0.5">Review candidate cover notes and confirm if you can refer them.</p>
+      </div>
+    </div>
+    <a href="{% url 'referrals:incoming' %}?status=pending" class="btn-primary text-xs px-4 py-2 self-start sm:self-auto flex-shrink-0">
+      Review Inquiries Now
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Split Sections -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    
+    <!-- Recent Requests -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm">Recent Incoming Inquiries</h3>
+        <a href="{% url 'referrals:incoming' %}" class="text-xs font-semibold text-brand-600 hover:underline">View All</a>
+      </div>
+      <div class="space-y-3">
+        {% for ref in incoming_requests %}
+        <div class="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-start justify-between gap-3 hover:border-slate-200 transition-all">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-900">{{ ref.requester.get_full_name }}</p>
+            <p class="text-[11px] text-slate-500 truncate">For: {{ ref.job.title }}</p>
+            <p class="text-[10px] text-slate-400 mt-1">{{ ref.created_at|timesince }} ago</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="badge {% if ref.status == 'pending' %}badge-yellow{% elif ref.status == 'accepted' %}badge-green{% else %}badge-red{% endif %} text-[10px]">
+              {{ ref.get_status_display }}
+            </span>
+            {% if ref.status == 'pending' %}
+            <a href="{% url 'referrals:respond' ref.pk %}" class="btn-primary text-xs px-2.5 py-1">Respond</a>
+            {% endif %}
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-xs text-slate-400 py-6 text-center">No incoming referral requests yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Active Postings -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900 text-sm">Your Posted Roles</h3>
+        <a href="{% url 'jobs:my_jobs' %}" class="text-xs font-semibold text-brand-600 hover:underline">View All</a>
+      </div>
+      <div class="space-y-3">
+        {% for job in my_jobs %}
+        <div class="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <a href="{% url 'jobs:detail' job.pk %}" class="text-xs font-bold text-slate-900 hover:text-brand-600 block truncate">
+              {{ job.title }}
+            </a>
+            <p class="text-[11px] text-slate-400">{{ job.company }} · {{ job.referrals_count }} referral inquiries</p>
+          </div>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <a href="{% url 'jobs:edit' job.pk %}" class="btn-secondary text-xs px-2.5 py-1">Edit</a>
+          </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-6">
+          <p class="text-xs text-slate-400 mb-2">You haven't posted any jobs yet.</p>
+          <a href="{% url 'jobs:create' %}" class="btn-primary text-xs inline-flex">Post Your First Job</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+  {% endif %}
+
+
+  <!-- ======================================================== -->
+  <!-- 3. ADMIN DASHBOARD -->
+  <!-- ======================================================== -->
+  {% if user.is_portal_admin %}
+  
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Platform Governance & Administration</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Full ecosystem visibility, verification, and hiring outcome supervision.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'referrals:admin_manage' %}" class="btn-primary text-xs px-4 py-2.5">
+        Outcome Supervision Hub
+      </a>
+      <a href="/admin/" class="btn-secondary text-xs px-4 py-2.5" target="_blank">
+        Django Admin Panel →
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Stat Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div class="stat-card">
+      <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Users</span>
+      <p class="text-2xl font-extrabold text-slate-900 mt-1">{{ total_users }}</p>
+    </div>
+    <div class="stat-card">
+      <span class="text-[11px] font-bold text-brand-600 uppercase tracking-wider block">Alumni</span>
+      <p class="text-2xl font-extrabold text-brand-700 mt-1">{{ total_alumni }}</p>
+    </div>
+    <div class="stat-card">
+      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Job Seekers</span>
+      <p class="text-2xl font-extrabold text-slate-700 mt-1">{{ total_seekers }}</p>
+    </div>
+    <div class="stat-card">
+      <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block">Active Jobs</span>
+      <p class="text-2xl font-extrabold text-indigo-700 mt-1">{{ active_jobs }}</p>
+    </div>
+    <div class="stat-card border-l-4 border-l-amber-400">
+      <span class="text-[11px] font-bold text-amber-700 uppercase tracking-wider block">Pending</span>
+      <p class="text-2xl font-extrabold text-amber-600 mt-1">{{ pending_referrals }}</p>
+    </div>
+    <div class="stat-card border-l-4 border-l-emerald-400">
+      <span class="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block">Hired</span>
+      <p class="text-2xl font-extrabold text-emerald-600 mt-1">{{ hired_count }}</p>
+    </div>
+  </div>
+
+  <!-- Supervision Table -->
+  <div class="card overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div>
+        <h2 class="font-bold text-slate-900 text-sm">Recent Platform Referral Requests</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Click any request to mark official interview/hire outcome</p>
+      </div>
+      <a href="{% url 'referrals:admin_manage' %}" class="text-xs font-semibold text-brand-600 hover:underline">Manage All {{ total_referrals }} Requests →</a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50/75 border-b border-slate-100 text-[11px] uppercase tracking-wider font-bold text-slate-500">
+          <tr>
+            <th class="px-6 py-3">Candidate</th>
+            <th class="px-6 py-3">Role & Referrer</th>
+            <th class="px-6 py-3">Referral Status</th>
+            <th class="px-6 py-3">Admin Outcome</th>
+            <th class="px-6 py-3">Date</th>
+            <th class="px-6 py-3 text-right">Supervise</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for ref in recent_referrals %}
+          <tr class="hover:bg-slate-50/60 transition-colors">
+            <td class="px-6 py-3.5">
+              <span class="font-bold text-slate-900 text-xs block">{{ ref.requester.get_full_name }}</span>
+              <span class="text-[11px] text-slate-400">{{ ref.requester.email }}</span>
+            </td>
+            <td class="px-6 py-3.5">
+              <span class="font-medium text-slate-800 text-xs block">{{ ref.job.title|truncatechars:35 }}</span>
+              <span class="text-[11px] text-slate-400">{{ ref.job.company }} · by {{ ref.alumni.get_full_name }}</span>
+            </td>
+            <td class="px-6 py-3.5">
+              <span class="badge {% if ref.status == 'pending' %}badge-yellow{% elif ref.status == 'accepted' %}badge-green{% else %}badge-red{% endif %} text-[11px]">
+                {{ ref.get_status_display }}
+              </span>
+            </td>
+            <td class="px-6 py-3.5">
+              {% if ref.admin_outcome %}
+              <span class="badge {% if ref.admin_outcome == 'hired' %}badge-green{% elif ref.admin_outcome == 'interviewed' %}badge-blue{% else %}badge-gray{% endif %} text-[11px]">
+                {{ ref.get_admin_outcome_display }}
+              </span>
+              {% else %}
+              <span class="text-xs text-slate-400 font-medium">Unreviewed</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-3.5 text-xs text-slate-400">
+              {{ ref.created_at|date:"M d, Y" }}
+            </td>
+            <td class="px-6 py-3.5 text-right">
+              <a href="{% url 'referrals:mark_outcome' ref.pk %}" class="btn-secondary text-xs px-3 py-1 font-semibold">
+                Mark Outcome
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

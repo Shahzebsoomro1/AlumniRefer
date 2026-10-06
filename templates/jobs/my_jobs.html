@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}My Job Postings — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">My Active Openings</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Manage positions you posted from your employer and review candidate referral pipelines</p>
+    </div>
+    <a href="{% url 'jobs:create' %}" class="btn-primary text-xs px-4 py-2.5">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      Post New Opening
+    </a>
+  </div>
+
+  <!-- Jobs List -->
+  <div class="space-y-3.5">
+    {% for job in jobs %}
+    <div class="card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 transition-all hover:border-slate-300">
+      
+      <!-- Info -->
+      <div class="flex items-start gap-4 min-w-0 flex-1">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 text-white font-extrabold text-base flex items-center justify-center flex-shrink-0 shadow-sm">
+          {{ job.company|slice:":2"|upper }}
+        </div>
+        <div class="min-w-0 flex-1 space-y-1">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <h2 class="text-base font-bold text-slate-900 hover:text-brand-600 transition-colors">
+              <a href="{% url 'jobs:detail' job.pk %}">{{ job.title }}</a>
+            </h2>
+            <span class="badge {% if job.status == 'active' %}badge-green{% elif job.status == 'closed' %}badge-gray{% else %}badge-red{% endif %} text-[11px]">
+              {{ job.get_status_display }}
+            </span>
+          </div>
+          
+          <p class="text-xs text-slate-500 font-medium">
+            {{ job.company }} · {{ job.get_employment_type_display }} · {{ job.get_experience_level_display }}
+          </p>
+
+          <div class="flex items-center gap-4 pt-1 text-xs text-slate-400 font-medium">
+            <span>Posted {{ job.created_at|date:"M d, Y" }}</span>
+            <span>·</span>
+            <span class="text-slate-600 font-bold">{{ job.referrals_count }} candidate referral{{ job.referrals_count|pluralize }}</span>
+            {% if job.pending_referrals > 0 %}
+            <span class="text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              {{ job.pending_referrals }} pending review
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2 flex-shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+        <a href="{% url 'jobs:detail' job.pk %}" class="btn-secondary text-xs px-3.5 py-2 font-medium">
+          View Post
+        </a>
+        <a href="{% url 'jobs:edit' job.pk %}" class="btn-secondary text-xs px-3.5 py-2 font-medium">
+          Edit
+        </a>
+      </div>
+
+    </div>
+    {% empty %}
+    <div class="card p-16 text-center text-slate-400 space-y-3">
+      <svg class="w-12 h-12 mx-auto text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+      <p class="text-base font-bold text-slate-700">You haven't posted any jobs yet</p>
+      <p class="text-xs text-slate-400">Share internal openings from your company with ex-colleagues.</p>
+      <a href="{% url 'jobs:create' %}" class="btn-primary text-xs inline-flex mt-2">Post Opening</a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Post an Opening — AlumniRefer{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Post a Job Opening</h1>
+      <p class="text-slate-500 text-sm mt-0.5">Share an opportunity from your employer and offer internal referrals</p>
+    </div>
+    <a href="{% url 'jobs:list' %}" class="btn-secondary text-xs px-3.5 py-2">
+      Cancel
+    </a>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-section">
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Job Title <span class="text-rose-500">*</span></label>
+          {{ form.title }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Company <span class="text-rose-500">*</span></label>
+          {{ form.company }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Location</label>
+          {{ form.location }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Employment Type</label>
+          {{ form.employment_type }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Experience Level</label>
+          {{ form.experience_level }}
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Compensation Range</label>
+          {{ form.salary_range }}
+          <p class="text-[11px] text-slate-400 mt-1">e.g. $160,000 - $210,000 + Equity</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Application Deadline</label>
+          {{ form.application_deadline }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Role Overview <span class="text-rose-500">*</span></label>
+          {{ form.description }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Requirements & Qualifications <span class="text-rose-500">*</span></label>
+          {{ form.requirements }}
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Required Skills</label>
+          {{ form.skills_required }}
+          <p class="text-[11px] text-slate-400 mt-1">Comma-separated: Python, Distributed Systems, Go, Kubernetes</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
+        <a href="{% url 'jobs:list' %}" class="btn-secondary text-xs px-4 py-2">
+          Discard
+        </a>
+        <button type="submit" class="btn-primary text-xs px-6 py-2.5 font-bold shadow-md shadow-brand-500/20">
+          Publish Job Opening →
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
