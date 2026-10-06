@@ -8,7 +8,7 @@ Designed and architected end-to-end to connect ex-employees at top companies wit
 
 ## 🌟 Core Value Proposition
 
-- **No Resume Black Holes**: Job seekers get direct employee referrals into top tech firms (Google, Microsoft, Stripe, AWS, etc.).
+- **No Resume Black Holes**: Job seekers get direct employee referrals 
 - **Alumni Engagement**: Corporate alumni give back to their former network while earning company referral bonuses.
 - **Admin Moderation & Governance**: Platform administrators oversee the referral pipeline, eliminate spam, and track actual hiring outcomes (*Interviewed*, *Hired*, *Not Hired*).
 
